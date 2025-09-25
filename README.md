@@ -1,17 +1,23 @@
-ForoU - Plataforma de Preguntas y Respuestas Académicas
+# ForoU - Plataforma de Preguntas y Respuestas Académicas
 
-CAPSTONE_300D
+## Sección  
+**CAPSTONE_300D**
 
-Integrantes
+---
 
-Matías Melivilu
+## Integrantes  
+- **Matías Melivilu**  
+- **Giovanni Oyarzun**  
 
-Giovanni Oyarzun
+---
 
-Descripción del Proyecto
+## Descripción del Proyecto  
+**ForoU** es una plataforma académica diseñada exclusivamente para estudiantes de **DuocUC**, cuyo objetivo es **facilitar el aprendizaje colaborativo** mediante un sistema de **preguntas y respuestas**.  
 
-ForoU es una plataforma académica diseñada exclusivamente para estudiantes de DuocUC, cuyo objetivo es facilitar el aprendizaje colaborativo mediante un sistema de preguntas y respuestas.
+En la plataforma, los estudiantes podrán:  
+- Crear sus cuentas e iniciar sesión.  
+- Publicar dudas en distintas materias.  
+- Responder a otros estudiantes.  
+- Participar activamente en una comunidad enfocada en el apoyo académico.  
 
-Los estudiantes podrán crear sus cuentas, publicar dudas en diversas materias, responder a otros compañeros y participar activamente en una comunidad enfocada en el apoyo académico.
-
-El proyecto busca fomentar la participación estudiantil y la construcción de conocimiento en conjunto dentro de la comunidad de DuocUC.
+El proyecto busca **fomentar la participación estudiantil** y la **construcción de conocimiento en conjunto** dentro de la comunidad de **DuocUC**.  
