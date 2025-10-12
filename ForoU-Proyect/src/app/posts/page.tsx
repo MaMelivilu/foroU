@@ -6,7 +6,7 @@ import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { logout, db } from "@/firebase/client"
 import { useFirestoreUser } from "@/hooks/useFirestoreUser"
-import { collection, getDocs, query, orderBy } from "firebase/firestore"
+import { collection, getDocs, query, orderBy, onSnapshot } from "firebase/firestore"
 
 export default function HomePage() {
   const { user } = useUser()
@@ -22,26 +22,18 @@ export default function HomePage() {
     if (user === null) router.push("/")
   }, [user, router])
 
-  useEffect(() => {
-    async function fetchPosts() {
-      try {
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"))
-        const snapshot = await getDocs(q)
-        const postsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        setPosts(postsData)
-        setFilteredPosts(postsData)
-      } catch (error) {
-        console.error("Error al cargar los posts:", error)
-      } finally {
-        setLoadingPosts(false)
-      }
-    }
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const postsData = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setPosts(postsData);
+    setFilteredPosts(postsData);
+    setLoadingPosts(false); // se mueve aquí porque ahora se carga en tiempo real
+  });
 
-    fetchPosts()
-  }, [])
+  return () => unsubscribe(); // limpia la suscripción al desmontar
+}, []);
 
   useEffect(() => {
     const queryStr = search.trim().toLowerCase()
