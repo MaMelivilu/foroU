@@ -6,7 +6,7 @@ import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { logout, db } from "@/firebase/client"
 import { useFirestoreUser } from "@/hooks/useFirestoreUser"
-import { collection, getDocs, query, orderBy, onSnapshot } from "firebase/firestore"
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore"
 
 export default function HomePage() {
   const { user } = useUser()
@@ -18,23 +18,28 @@ export default function HomePage() {
   const [loadingPosts, setLoadingPosts] = useState(true)
   const [search, setSearch] = useState("")
 
+  // 🔹 Redirección si no hay usuario autenticado
   useEffect(() => {
     if (user === null) router.push("/")
   }, [user, router])
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const postsData = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPosts(postsData);
-    setFilteredPosts(postsData);
-    setLoadingPosts(false); // se mueve aquí porque ahora se carga en tiempo real
-  });
+  // 🔹 Suscripción en tiempo real a los posts desde Firestore
+  useEffect(() => {
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"))
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const postsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setPosts(postsData)
+      setFilteredPosts(postsData)
+      setLoadingPosts(false)
+    })
 
-  return () => unsubscribe(); // limpia la suscripción al desmontar
-}, []);
+    return () => unsubscribe() // limpieza al desmontar
+  }, [])
 
+  // 🔹 Filtro de búsqueda (por texto y categorías con #)
   useEffect(() => {
     const queryStr = search.trim().toLowerCase()
     if (!queryStr) {
@@ -70,6 +75,7 @@ export default function HomePage() {
     setFilteredPosts(filtered)
   }, [search, posts])
 
+  // 🔹 Pantalla de carga
   if (user === undefined || userLoading || loadingPosts) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -81,14 +87,17 @@ export default function HomePage() {
     )
   }
 
+  // 🔹 Función auxiliar para mostrar una vista previa del contenido
   function getPreview(text: string, wordLimit: number) {
     const words = text.split(" ")
     if (words.length <= wordLimit) return text
     return words.slice(0, wordLimit).join(" ") + "..."
   }
 
+  // 🔹 Render principal
   return (
     <div className="min-h-screen flex">
+      {/* Panel lateral */}
       <aside className="w-64 bg-white shadow-2xl flex flex-col p-4 fixed h-full">
         {firestoreUser && (
           <Link href="/perfil">
@@ -112,20 +121,21 @@ export default function HomePage() {
 
         <button
           onClick={() => logout(router)}
-          className="mt-auto px-3 py-2 bg-red-500 text-white rounded hover:bg-red-800 text-center cursor-pointer "
+          className="mt-auto px-3 py-2 bg-red-500 text-white rounded hover:bg-red-800 text-center cursor-pointer"
         >
           Cerrar sesión
         </button>
       </aside>
 
+      {/* Contenido principal */}
       <main className="min-h-screen p-6 flex justify-center ml-[30%]">
-        <div className="w-full max-w-5xl flex flex-col gap-6"> {/* max-w aumentado */}
+        <div className="w-full max-w-5xl flex flex-col gap-6">
           <input
             type="text"
             placeholder="Buscar posts o categorías (#ejemplo)"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-blue-400 w-200"
+            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-blue-400 w-full"
           />
 
           {filteredPosts.length === 0 ? (
@@ -141,32 +151,38 @@ export default function HomePage() {
 
                   {/* Render multimedia */}
                   {post.mediaFiles && post.mediaFiles.length > 0 && (
-                  <div className={`grid ${post.mediaFiles.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-4 mt-4 w-200`}>
-                    {post.mediaFiles.map((media: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="h-120 rounded border-none overflow-hidden flex items-center justify-center"
-                      >
-                        {media.type === "video" ? (
-                          <video
-                            src={media.url}
-                            className="max-w-full max-h-full"
-                            controls
-                          />
-                        ) : (
-                          <img
-                            src={media.url}
-                            alt={`media-${idx}`}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                    <div
+                      className={`grid ${
+                        post.mediaFiles.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                      } gap-4 mt-4 w-full`}
+                    >
+                      {post.mediaFiles.map((media: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="h-120 rounded overflow-hidden flex items-center justify-center"
+                        >
+                          {media.type === "video" ? (
+                            <video
+                              src={media.url}
+                              className="max-w-full max-h-full"
+                              controls
+                            />
+                          ) : (
+                            <img
+                              src={media.url}
+                              alt={`media-${idx}`}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {post.categories && post.categories.length > 0 && (
-                    <div className="mt-2 text-sm text-gray-400">{post.categories.join(", ")}</div>
+                    <div className="mt-2 text-sm text-gray-400">
+                      {post.categories.join(", ")}
+                    </div>
                   )}
 
                   <div className="flex items-center gap-2 mt-2">
@@ -186,5 +202,8 @@ export default function HomePage() {
         </div>
       </main>
     </div>
+  )
+}
+
   )
 }
