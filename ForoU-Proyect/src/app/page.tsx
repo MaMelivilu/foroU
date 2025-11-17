@@ -2,9 +2,9 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link';
-import Button from '@/components/ButtonGit/page';
-import ButtonGit from '@/components/ButtonGit/page';
-import ButtonGoogle from '@/components/ButtonGoogle/page';
+import Button from '@/components/ButtonGit';
+import ButtonGit from '@/components/ButtonGit';
+import ButtonGoogle from '@/components/ButtonGoogle';
 import { loginWithGithub, loginWithGoogle } from '@/firebase/client';
 import { useUser } from '@/hooks/useUser'
 

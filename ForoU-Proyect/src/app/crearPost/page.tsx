@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { useFirestoreUser } from '@/hooks/useFirestoreUser';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, storage } from '@/firebase/client';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -20,6 +20,7 @@ export default function CreatePost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [categories, setCategories] = useState('');
+  const [comunidadId, setComunidadId] = useState<string | null>(null);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +38,7 @@ export default function CreatePost() {
     </div>
   );
 
-  const handleAddMedia = () => {
-    fileInputRef.current?.click();
-  };
+  const handleAddMedia = () => fileInputRef.current?.click();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !user) return;
@@ -69,27 +68,77 @@ export default function CreatePost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user || !firestoreUser) return;
 
     try {
+      // 1️⃣ Crear el post
       await addDoc(collection(db, "posts"), {
         title,
         content,
         categories: categories.split(' ').filter(c => c.startsWith('#')),
-        mediaFiles, // Guardamos URLs + tipo
+        mediaFiles,
+        comunidadId,
         createdAt: serverTimestamp(),
         authorId: firestoreUser.id,
         authorName: firestoreUser.displayName,
         authorPhoto: firestoreUser.photoURL,
-        votosTotales: 0,
       });
 
+      // 2️⃣ Actualizar o crear el logro "posts creados"
+      const logroRef = doc(db, "users", user.uid, "logros", "posts");
+      const logroSnap = await getDoc(logroRef);
+
+      let leveledUp = false;
+      let newLevel = 1;
+
+      if (logroSnap.exists()) {
+        const data = logroSnap.data();
+        let newCurrent = (data.current || 0) + 1;
+        newLevel = data.level || 1;
+        let goal = data.goal || 5;
+
+        if (newCurrent >= goal) {
+          newLevel += 1;
+          newCurrent = 0;
+          goal += 5; // Incrementa dificultad por nivel
+          leveledUp = true;
+        }
+
+        await setDoc(logroRef, { current: newCurrent, level: newLevel, goal }, { merge: true });
+      } else {
+        await setDoc(logroRef, {
+          type: "posts",
+          current: 1,
+          level: 1,
+          goal: 5,
+          icon: "📝",
+          label: "Posts creados"
+        });
+        newLevel = 1;
+      }
+
+      // 3️⃣ Crear notificación si subió de nivel
+      if (leveledUp) {
+        const notifRef = doc(collection(db, `users/${firestoreUser.id}/notifications`));
+        await setDoc(notifRef, {
+          type: "level_up_post",
+          message: `📝 Has subido al nivel ${newLevel}`,
+          createdAt: serverTimestamp(),
+          isRead: false
+        });
+      }
+
+      // 4️⃣ Limpiar formulario y redirigir
       setTitle('');
       setContent('');
       setCategories('');
+      setComunidadId(null);
       setMediaFiles([]);
       router.push('/posts');
+
     } catch (error) {
-      console.error('Error al crear post:', error);
+      console.error('Error al crear post o actualizar logro:', error);
+      alert('Ocurrió un error al crear el post o actualizar el logro.');
     }
   };
 
@@ -121,12 +170,11 @@ export default function CreatePost() {
             required
           />
 
-          {/* Selector de archivos multimedia */}
           <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={handleAddMedia}
-              className="bg-green-500 text-white py-2 rounded hover:bg-green-600 w-52"
+              className="bg-green-500 text-white py-2 rounded hover:bg-green-600"
             >
               {uploading ? "Subiendo..." : "Subir archivo multimedia"}
             </button>
@@ -138,7 +186,6 @@ export default function CreatePost() {
               onChange={handleFileChange}
             />
 
-            {/* Preview de archivos */}
             <div className="flex flex-wrap gap-2 mt-2">
               {mediaFiles.map((file, idx) => 
                 file.type === 'image' ? (

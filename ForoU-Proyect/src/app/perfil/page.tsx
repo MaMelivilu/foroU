@@ -6,17 +6,19 @@ import { useFirestoreUser } from "@/hooks/useFirestoreUser"
 import { useUser } from "@/hooks/useUser"
 import { useUserPosts } from "@/hooks/useUserPosts"
 import { useSavedPosts } from "@/hooks/useSavedPosts"
+import { useSavedVideos } from "@/hooks/useSavedVideos"
 import { updateDoc, doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "@/firebase/client"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import Link from "next/link"
-import { Trash2, Bookmark, BookmarkMinus } from "lucide-react"
+import { Trash2, BookmarkMinus } from "lucide-react"
 
 export default function ProfilePage() {
   const { user } = useUser()
   const { firestoreUser, loading } = useFirestoreUser()
   const { posts, loading: loadingPosts } = useUserPosts()
   const { savedPosts, toggleSave, loading: loadingSaved } = useSavedPosts()
+  const { myVideos, deleteVideo } = useSavedVideos()
   const router = useRouter()
 
   const [displayName, setDisplayName] = useState("")
@@ -104,7 +106,7 @@ export default function ProfilePage() {
           <img
             src={photoURL || "/default-avatar.png"}
             alt="avatar"
-            className="w-24 h-24 rounded-full border border-gray-300 cursor-pointer hover:opacity-80"
+            className="w-24 h-24 rounded-full border border-gray-300 cursor-pointer hover:opacity-80 object-cover object-center"
             onClick={handlePhotoClick}
           />
           <input
@@ -154,40 +156,7 @@ export default function ProfilePage() {
               <p className="text-gray-500 text-center">Aún no has creado ningún post.</p>
             ) : (
               <ul className="divide-y divide-gray-300">
-                {posts.map((post) => {
-                  const isSaved = savedPosts.some(p => p.id === post.id)
-                  return (
-                    <li key={post.id} className="flex justify-between items-center py-2">
-                      <Link
-                        href={`/contenidoPost/${post.id}`}
-                        className="text-blue-500 hover:text-blue-800 truncate flex-1"
-                        title={post.title}
-                      >
-                        {post.title}
-                      </Link>
-
-                      <div className="flex gap-2">
-
-                        <Trash2
-                          className="w-5 h-5 text-red-400 hover:text-red-800 cursor-pointer flex-shrink-0 transition-colors"
-                          onClick={() => handleDeletePost(post.id)}
-                        />
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-
-          {/* Posts Guardados */}
-          <div className="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl shadow-inner max-h-64 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-3 text-center text-gray-700">Posts Guardados</h2>
-            {savedPosts.length === 0 ? (
-              <p className="text-gray-500 text-center">Aún no tienes posts guardados.</p>
-            ) : (
-              <ul className="divide-y divide-gray-300">
-                {savedPosts.map((post) => (
+                {posts.map((post) => (
                   <li key={post.id} className="flex justify-between items-center py-2">
                     <Link
                       href={`/contenidoPost/${post.id}`}
@@ -197,8 +166,37 @@ export default function ProfilePage() {
                       {post.title}
                     </Link>
 
-                    <button onClick={() => toggleSave(post.id)}>
-                      <BookmarkMinus className="w-5 h-5 text-yellow-500 hover:text-yellow-700" />
+                    <Trash2
+                      className="w-5 h-5 text-red-400 hover:text-red-800 cursor-pointer flex-shrink-0 transition-colors"
+                      onClick={() => handleDeletePost(post.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Mis Videos */}
+          <div className="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl shadow-inner max-h-64 overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-3 text-center text-gray-700">Mis Videos</h2>
+            {myVideos.length === 0 ? (
+              <p className="text-gray-500 text-center">No has subido videos.</p>
+            ) : (
+              <ul className="divide-y divide-gray-300">
+                {myVideos.map((v) => (
+                  <li key={v.id} className="flex justify-between items-center py-2">
+                    <button
+                      onClick={() => router.push(`/videos/${v.id}`)}
+                      className="text-blue-600 hover:text-blue-800 truncate flex-1 text-left pr-3 cursor-pointer"
+                    >
+                      {v.title}
+                    </button>
+
+                    <button
+                      onClick={() => deleteVideo(v.id)}
+                      className="p-1 rounded transition"
+                    >
+                      <Trash2 className="hover:text-red-800 w-5 h-5 text-red-400 cursor-pointer" />
                     </button>
                   </li>
                 ))}
