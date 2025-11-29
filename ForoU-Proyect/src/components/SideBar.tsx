@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { LogOut, House, PencilLine, Users, Video, Star } from "lucide-react"
+import { LogOut, House, PencilLine, Users, Video, Star, ScrollText, Info, BookOpen } from "lucide-react"
 import { logout } from "@/firebase/client"
 import { useUser } from "@/hooks/useUser"
 import { useFirestoreUser } from "@/hooks/useFirestoreUser"
@@ -76,17 +76,38 @@ export default function SideBar() {
           Favoritos
         </Link>
 
+        <div className="mt-auto flex flex-col">
+
+          <Link
+            href="/info/acerca"
+            className="mb-4 px-3 py-2 text-gray-600 text-[18px] rounded hover:bg-gray-100 flex items-center gap-2"
+          >
+            <BookOpen className="mr-2" />
+            Acerca de ForoU
+          </Link>
+
+
+          
+          <Link
+            href="/info/reglas"
+            className="mb-7 px-3 py-2 text-gray-600 text-[18px] rounded hover:bg-gray-100 flex items-center gap-2"
+          >
+            <ScrollText className="mr-2" />
+            Reglas ForoU
+          </Link>
 
 
 
-      {/* LOGOUT */}
-      <button
-        onClick={() => logout(router)}
-        className="mt-auto px-3 py-2 text-red-400 rounded hover:bg-gray-100 hover:text-red-500 text-[18px] flex items-center gap-2"
-      >
-        <LogOut className="mr-2" />
-        Cerrar sesión
-      </button>
+
+          {/* LOGOUT */}
+          <button
+            onClick={() => logout(router)}
+            className="mt-auto px-3 py-2 text-red-400 rounded hover:bg-gray-100 hover:text-red-500 text-[18px] flex items-center gap-2"
+          >
+            <LogOut className="mr-2" />
+            Cerrar sesión
+          </button>
+        </div>
     </aside>
   )
 }
