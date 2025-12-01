@@ -101,7 +101,7 @@ export default function UploadVideo() {
           {description.length}/{MAX_DESCRIPTION}
         </p>
 
-        <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center gap-2 justify-center">
+        <label className="cursor-pointer bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded flex items-center gap-2 justify-center">
           <Upload size={18} />
           Seleccionar archivo
           <input
@@ -136,7 +136,7 @@ export default function UploadVideo() {
           onClick={handleUpload}
           disabled={uploading}
           className={`mt-3 py-2 rounded text-white ${
-            uploading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+            uploading ? "bg-blue-500" : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
           {uploading ? "Subiendo..." : "Subir Video"}

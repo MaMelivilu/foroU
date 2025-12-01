@@ -174,7 +174,7 @@ export default function CreatePost() {
             <button
               type="button"
               onClick={handleAddMedia}
-              className="bg-green-500 text-white py-2 rounded hover:bg-green-600"
+              className="bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600"
             >
               {uploading ? "Subiendo..." : "Subir archivo multimedia"}
             </button>

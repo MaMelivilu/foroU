@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import LikeButton from "@/components/LikeButton";
 
 export default function VideoDetailPage({ params }: any) {
-
   const { id } = React.use(params as Promise<{ id: string }>);
 
   const [video, setVideo] = useState<any>(null);
@@ -35,7 +34,7 @@ export default function VideoDetailPage({ params }: any) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-white">
+      <div className="flex justify-center items-center h-screen text-black">
         Cargando video...
       </div>
     );
@@ -43,11 +42,11 @@ export default function VideoDetailPage({ params }: any) {
 
   if (!video) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-white">
+      <div className="flex flex-col items-center justify-center h-screen text-black">
         <p>Video no encontrado</p>
         <button
           onClick={() => router.back()}
-          className="mt-4 px-4 py-2 bg-neutral-800 rounded-lg"
+          className="mt-4 px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition"
         >
           Volver
         </button>
@@ -56,15 +55,17 @@ export default function VideoDetailPage({ params }: any) {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col items-center py-6 px-4">
+    <div className="min-h-screen bg-white flex flex-col items-center py-6 px-4">
+      {/* Botón volver */}
       <button
         onClick={() => router.back()}
-        className="text-white mb-4 hover:text-gray-300"
+        className="text-black mb-4 hover:text-gray-600 transition"
       >
         ⬅ Volver
       </button>
 
-      <div className="bg-black border border-gray-700 rounded-2xl p-4 shadow-lg w-full max-w-3xl">
+      {/* Tarjeta */}
+      <div className="bg-gray-100 border border-gray-300 rounded-2xl p-4 shadow-lg w-full max-w-3xl">
         <video
           ref={videoRef}
           src={video.videoURL}
@@ -75,23 +76,24 @@ export default function VideoDetailPage({ params }: any) {
           playsInline
         />
 
-        <div className="mt-4 text-white">
+        {/* Textos */}
+        <div className="mt-4 text-black">
           <h1 className="text-2xl font-bold">{video.title}</h1>
 
-          <p
-            className="text-gray-300 mt-2 max-w-[700px] line-clamp-2 break-words"
-          >
+          <p className="text-gray-700 mt-2 max-w-[700px] line-clamp-2 break-words">
             {video.description}
           </p>
 
+          {/* Usuario + like */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-3">
               <img
                 src={video.usernamePhoto || "/default-avatar.png"}
-                className="w-10 h-10 rounded-full border border-white/40 object-cover"
+                className="w-10 h-10 rounded-full border border-black/40 object-cover"
               />
-
-              <span className="font-semibold">{video.username}</span>
+              <span className="font-semibold text-black">
+                {video.username}
+              </span>
             </div>
 
             <LikeButton videoId={video.id} />

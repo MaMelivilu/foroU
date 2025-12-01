@@ -171,7 +171,7 @@ export default function CreateCommunityPostPage({
           <button
             type="button"
             onClick={handleAddMedia}
-            className="bg-green-500 text-white py-2 rounded cursor-pointer hover:bg-green-700"
+            className="bg-yellow-500 text-white py-2 rounded cursor-pointer hover:bg-yellow-700"
           >
             {uploading ? "Subiendo..." : "Subir multimedia"}
           </button>

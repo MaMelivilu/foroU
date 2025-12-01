@@ -35,7 +35,7 @@ export default function SavedLikePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Posts Guardados */}
-            <section className="bg-gray-50 p-4 rounded-xl shadow-inner max-h-64 overflow-y-auto">
+            <section className="bg-gray-50 p-4 rounded-xl shadow-inner max-h-200 overflow-y-auto">
               <h2 className="text-lg font-semibold mb-3 text-center">Posts Guardados</h2>
               {savedPosts.length === 0 ? (
                 <p className="text-gray-500 text-center">Aún no tienes posts guardados.</p>
@@ -60,7 +60,7 @@ export default function SavedLikePage() {
             </section>
 
             {/* Videos que me gustaron */}
-            <section className="bg-gray-50 p-4 rounded-xl shadow-inner max-h-64 overflow-y-auto">
+            <section className="bg-gray-50 p-4 rounded-xl shadow-inner max-h-200 overflow-y-auto">
               <h2 className="text-lg font-semibold mb-3 text-center">Videos que me gustaron</h2>
               {likedVideos.length === 0 ? (
                 <p className="text-gray-500 text-center">Aún no has dado like.</p>
