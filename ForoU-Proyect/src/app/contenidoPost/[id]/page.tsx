@@ -27,7 +27,7 @@ interface Post {
   title: string;
   content: string;
   mediaFiles?: { type: "image" | "video"; url: string }[];
-  authorUid: string;
+  authorId: string;        // ← CAMBIADO AQUÍ
   authorName: string;
   authorPhoto: string;
   createdAt: any;
@@ -37,7 +37,7 @@ interface Post {
 interface Comment {
   id: string;
   text: string;
-  authorUid: string;
+  authorId: string;        // ← CAMBIADO AQUÍ
   authorName: string;
   authorPhoto: string;
   createdAt: any;
@@ -107,7 +107,7 @@ export default function PostPage({ params }: PostPageProps) {
       // Agregar comentario
       await addDoc(commentsRef, {
         text: commentText,
-        authorUid: firestoreUser.id,
+        authorId: firestoreUser.id,              // ← CAMBIADO
         authorName: firestoreUser.displayName,
         authorPhoto: firestoreUser.photoURL,
         createdAt: serverTimestamp()
@@ -115,14 +115,14 @@ export default function PostPage({ params }: PostPageProps) {
 
       setCommentText("");
 
-      // Actualizar logro de comentarios
+      // Actualizar logro
       const logroRef = doc(db, "users", firestoreUser.id, "logros", "comments");
       const snap = await getDoc(logroRef);
 
       let current = 1;
       let level = 1;
       let goal = 10;
-      let leveledUp = false; // Detecta subida de nivel
+      let leveledUp = false;
 
       if (snap.exists()) {
         const data = snap.data() as any;
@@ -140,9 +140,9 @@ export default function PostPage({ params }: PostPageProps) {
 
       await setDoc(logroRef, { current, goal, level });
 
-      // Notificación al autor del post por nuevo comentario
-      if (firestoreUser.id !== post.authorUid) {
-        const notifRef = doc(collection(db, `users/${post.authorUid}/notifications`));
+      // Notificación al autor del post
+      if (firestoreUser.id !== post.authorId) {    // ← CAMBIADO
+        const notifRef = doc(collection(db, `users/${post.authorId}/notifications`));
         await setDoc(notifRef, {
           type: "new_comment",
           postId: id,
@@ -155,7 +155,7 @@ export default function PostPage({ params }: PostPageProps) {
         });
       }
 
-      // Notificación al usuario que subió de nivel
+      // Notificación por subir de nivel
       if (leveledUp) {
         const notifRef = doc(collection(db, `users/${firestoreUser.id}/notifications`));
         await setDoc(notifRef, {
